@@ -1,0 +1,12 @@
+begin setFirstName() 13:49:51:745
+data: Ivan
+end setFirstName() 13:49:51:747
+
+begin setFirstName() 13:49:51:748
+data: Petr
+end setFirstName() 13:49:51:748
+
+begin setLastName() 13:49:51:748
+data: Ivanov
+end setLastName() 13:49:51:749
+
