@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -15,35 +18,54 @@ import java.time.format.DateTimeFormatter;
 public class UserSetterLoggerAspect {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
+    private static final String LOG_PATH = "logs.txt"; // Шлях до файлу логів
 
-    @Around("execution(* com.example.model.User.set*(*))")
+    // Аспект для всіх "set" методів класу User
+    @Around("execution(* com.example.model.User.set*(..))")
     public Object logSetter(ProceedingJoinPoint joinPoint) throws Throwable {
-        // Додано логування для дебагу
-        System.out.println("[AOP] Аспект активний для методу: " + joinPoint.getSignature().getName());
+        // Перевіряємо, чи аспект активний
+        System.out.println("[DEBUG] Аспект активний. Перехоплюється метод: " + joinPoint.getSignature().getName());
 
+        // Отримуємо ім'я методу
         String methodName = joinPoint.getSignature().getName();
-        String property = methodName.replace("set", "").toLowerCase();
-        Object value = joinPoint.getArgs()[0];
+        Object[] args = joinPoint.getArgs(); // Аргументи методу (наприклад, значення для "setter")
+        String argument = args.length > 0 ? args[0].toString() : "No Args"; // Виводимо аргумент або "No Args"
 
-        LocalDateTime start = LocalDateTime.now();
-        logToFile("begin " + property + "() " + start.format(TIME_FORMATTER));
-        logToFile("data: " + value);
+        // Час початку
+        LocalDateTime startTime = LocalDateTime.now();
+        logToFile("begin " + methodName + "() " + startTime.format(TIME_FORMATTER));
+        logToFile("data: " + argument);
 
-        Object result = joinPoint.proceed();
+        Object result;
 
-        LocalDateTime end = LocalDateTime.now();
-        logToFile("end " + property + "() " + end.format(TIME_FORMATTER) + "\n");
+        try {
+            // Виконуємо справжній метод (викликаємо setter)
+            result = joinPoint.proceed();
+        } finally {
+            // Час завершення
+            LocalDateTime endTime = LocalDateTime.now();
+            logToFile("end " + methodName + "() " + endTime.format(TIME_FORMATTER) + "\n");
+        }
 
         return result;
     }
 
+    // Метод для запису даних у файл
     private void logToFile(String message) {
-        String logPath = "C:/Users/music/IdeaProjects/Loguvanya/logs.txt"; // Абсолютний шлях
-        try (FileWriter writer = new FileWriter(logPath, true)) {
-            writer.write(message + "\n");
-            System.out.println("Записано в файл: " + message); // Додано логування
+        try {
+            // Перевіряємо, чи існує файл, якщо ні — створюємо
+            Path filePath = Paths.get(LOG_PATH);
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+                System.out.println("[DEBUG] Файл " + LOG_PATH + " створено.");
+            }
+
+            try (FileWriter writer = new FileWriter(LOG_PATH, true)) {
+                writer.write(message + "\n"); // Записуємо повідомлення у файл
+                System.out.println("[DEBUG] Записано в файл: " + message); // Вивід у консоль для дебагу
+            }
         } catch (IOException e) {
-            System.err.println("Помилка запису в файл: " + e.getMessage());
+            System.err.println("[ERROR] Помилка запису в файл: " + e.getMessage()); // Якщо виникає помилка
         }
     }
 }

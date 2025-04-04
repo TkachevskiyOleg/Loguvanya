@@ -1,21 +1,23 @@
 package com.example.model;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class User {
+
     private String firstName;
     private String lastName;
 
-    // Гетери
     public String getFirstName() {
         return firstName;
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    // Сетери
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public void setLastName(String lastName) {

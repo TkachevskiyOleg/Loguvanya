@@ -4,15 +4,21 @@ import com.example.model.User;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-@Component // Переконайтеся, що аннотація присутня
+@Component
 public class DemoRunner implements CommandLineRunner {
+
+    private final User user;
+
+    // Ін'єкція біну User через конструктор
+    public DemoRunner(User user) {
+        this.user = user;
+    }
 
     @Override
     public void run(String... args) {
         System.out.println("DemoRunner: виклик сеттерів...");
-        User user = new User();
         user.setFirstName("Ivan");
-        user.setFirstName("Petr"); // Зміна значення
+        user.setFirstName("Petr");
         user.setLastName("Ivanov");
     }
 }
